@@ -14,12 +14,14 @@ import router from "../app/Router.js";
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills page but it is loading", () => {
     test("Then, Loading page should be rendered", () => {
-      // Write test
+      document.body.innerHTML = BillsUI({ loading: true });
+      expect(screen.getAllByText("Loading...")).toBeTruthy();
     });
   });
   describe("When I am on Bills page but back-end send an error message", () => {
     test("Then, Error page should be rendered", () => {
-      // Write test
+      document.body.innerHTML = BillsUI({ error: "some error message" });
+      expect(screen.getAllByText("Erreur")).toBeTruthy();
     });
   });
   describe("When I am on Bills Page", () => {
@@ -40,7 +42,7 @@ describe("Given I am connected as an employee", () => {
       window.onNavigate(ROUTES_PATH.Bills);
       await waitFor(() => screen.getByTestId("icon-window"));
       const windowIcon = screen.getByTestId("icon-window");
-      //to-do write expect expression
+      expect(windowIcon).toHaveClass("active-icon");
     });
     test("Then bills should be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills });
