@@ -8,7 +8,7 @@ import "@testing-library/jest-dom/extend-expect";
 
 import BillsUI from "../views/BillsUI.js";
 import { bills } from "../fixtures/bills.js";
-import { ROUTES_PATH } from "../constants/routes.js";
+import { ROUTES_PATH, ROUTES } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 
 import router from "../app/Router.js";
@@ -61,7 +61,33 @@ describe("Given I am connected as an employee", () => {
   });
   describe("When I am on Bills Page and I click on the 'New bill' button", async () => {
     test("I should be sent on the New Bill page", async () => {
-      // Write test
+      Object.defineProperty(window, "localStorage", {
+        value: localStorageMock,
+      });
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+        })
+      );
+      document.body.innerHTML = BillsUI({ data: bills });
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+      const store = null;
+      const billsContainer = new Bills({
+        document,
+        onNavigate,
+        store,
+        localStorage: window.localStorage,
+      });
+
+      const handleClickNewBill = jest.fn(billsContainer.handleClickNewBill);
+      const newBillBtn = screen.getByTestId("btn-new-bill");
+      newBillBtn.addEventListener("click", handleClickNewBill);
+      userEvent.click(newBillBtn);
+      expect(handleClickNewBill).toHaveBeenCalled();
+      expect(screen.getByText("Envoyer une note de frais")).toBeTruthy();
     });
   });
   describe("When I am on Bills Page and I click on the first eye icon", async () => {
