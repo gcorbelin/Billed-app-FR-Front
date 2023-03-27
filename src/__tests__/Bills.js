@@ -88,7 +88,7 @@ describe("Given I am connected as an employee", () => {
       const handleClickNewBill = jest.fn(billsContainer.handleClickNewBill);
       const newBillBtn = screen.getByTestId("btn-new-bill");
       newBillBtn.addEventListener("click", handleClickNewBill);
-      userEvent.click(newBillBtn);
+      await userEvent.click(newBillBtn);
       expect(handleClickNewBill).toHaveBeenCalled();
       expect(screen.getByText("Envoyer une note de frais")).toBeTruthy();
     });
