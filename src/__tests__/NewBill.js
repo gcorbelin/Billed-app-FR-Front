@@ -12,7 +12,7 @@ import router from "../app/Router.js";
 
 import { ROUTES_PATH, ROUTES } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
-import store from "../app/Store.js";
+import store from "../__mocks__/store";
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
@@ -81,7 +81,7 @@ describe("Given I am connected as an employee", () => {
     });
   });
   describe("When I am on NewBill Page and I upload a .txt file", () => {
-    test("Then the imput file should be empty", async () => {
+    test("Then the input file should be empty", async () => {
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });
@@ -109,9 +109,65 @@ describe("Given I am connected as an employee", () => {
       const file = new File(["dummy-content"], "myFile.txt", {
         type: "text/plain",
       });
-      await userEvent.upload(inputFile, file);
-      expect(handleChangeFile).not.toHaveBeenCalled();
+      await userEvent.upload(inputFile, file, { applyAccept: false });
+      expect(handleChangeFile).toHaveBeenCalled();
       expect(inputFile).toHaveValue("");
+    });
+  });
+  describe("When I am on NewBill Page and I upload file in the right format", () => {
+    test("Then the input file must contain the uploaded png file", async () => {
+      Object.defineProperty(window, "localStorage", {
+        value: localStorageMock,
+      });
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+        })
+      );
+      document.body.innerHTML = NewBillUI();
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+      const newBillContainer = new NewBill({
+        document,
+        onNavigate,
+        store,
+        localStorage: window.localStorage,
+      });
+
+      const handleChangeFile = jest.fn(newBillContainer.handleChangeFile);
+
+      const inputFile = screen.getByTestId("file");
+      expect(inputFile.files).toHaveLength(0);
+
+      inputFile.addEventListener("change", handleChangeFile);
+      const file = new File(["dummy-content"], "myFile.png", {
+        type: "image/png",
+      });
+      await userEvent.upload(inputFile, file, { applyAccept: false });
+      expect(handleChangeFile).toHaveBeenCalled();
+      expect(inputFile).toHaveValue("C:\\fakepath\\myFile.png");
+      expect(inputFile.files[0]).toStrictEqual(file);
+      expect(inputFile.files).toHaveLength(1);
+
+      const file2 = new File(["dummy-content"], "myFile.jpeg", {
+        type: "image/jpeg",
+      });
+      await userEvent.upload(inputFile, file2, { applyAccept: false });
+      expect(handleChangeFile).toHaveBeenCalled();
+      expect(inputFile).toHaveValue("C:\\fakepath\\myFile.jpeg");
+      expect(inputFile.files[0]).toStrictEqual(file2);
+      expect(inputFile.files).toHaveLength(1);
+
+      const file3 = new File(["dummy-content"], "myFile.jpg", {
+        type: "image/jpeg",
+      });
+      await userEvent.upload(inputFile, file3, { applyAccept: false });
+      expect(handleChangeFile).toHaveBeenCalled();
+      expect(inputFile).toHaveValue("C:\\fakepath\\myFile.jpg");
+      expect(inputFile.files[0]).toStrictEqual(file3);
+      expect(inputFile.files).toHaveLength(1);
     });
   });
   describe("When I do fill fields in correct format and I click on submit button 'Envoyer'", () => {
@@ -223,44 +279,5 @@ describe("Given I am connected as an employee", () => {
       fireEvent.submit(form);
       expect(screen.getByText("Mes notes de frais")).toBeTruthy();
     });
-  });
-});
-
-describe("When I am on NewBill Page and I upload an file in the right format", () => {
-  test("Then the input file must contain the uploaded png file", async () => {
-    Object.defineProperty(window, "localStorage", {
-      value: localStorageMock,
-    });
-    window.localStorage.setItem(
-      "user",
-      JSON.stringify({
-        type: "Employee",
-      })
-    );
-    document.body.innerHTML = NewBillUI();
-    const onNavigate = (pathname) => {
-      document.body.innerHTML = ROUTES({ pathname });
-    };
-    const newBillContainer = new NewBill({
-      document,
-      onNavigate,
-      store,
-      localStorage: window.localStorage,
-    });
-
-    const handleChangeFile = jest.fn(newBillContainer.handleChangeFile);
-
-    const inputFile = screen.getByTestId("file");
-    expect(inputFile.files).toHaveLength(0);
-
-    inputFile.addEventListener("change", handleChangeFile);
-    const file = new File(["dummy-content"], "myFile.png", {
-      type: "image/png",
-    });
-    await userEvent.upload(inputFile, file);
-    expect(handleChangeFile).toHaveBeenCalled();
-    expect(inputFile).toHaveValue("C:\\fakepath\\myFile.png");
-    expect(inputFile.files[0]).toStrictEqual(file);
-    expect(inputFile.files).toHaveLength(1);
   });
 });

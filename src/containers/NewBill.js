@@ -35,7 +35,7 @@ export default class NewBill {
         break;
       default:
         console.log("File extension should be jpg, jpeg or png");
-        input.value = null;
+        input.value = "";
         break;
     }
     const formData = new FormData();
