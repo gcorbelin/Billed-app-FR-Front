@@ -30,6 +30,14 @@ describe("Given I am connected as an employee", () => {
       expect(screen.getAllByText("Erreur")).toBeTruthy();
     });
   });
+  describe("When I am on Bills page but back-end send me no datas", () => {
+    test("Then, The table should be empty", () => {
+      document.body.innerHTML = BillsUI({ data: null });
+      console.log(document.body.innerHTML);
+      const tbody = screen.getByTestId("tbody");
+      expect(tbody.innerHTML.trim()).toBe("");
+    });
+  });
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
       Object.defineProperty(window, "localStorage", {
@@ -62,7 +70,7 @@ describe("Given I am connected as an employee", () => {
       expect(dates).toEqual(datesSorted);
     });
   });
-  describe("When I am on Bills Page and I click on the 'New bill' button", async () => {
+  describe("When I am on Bills Page and I click on the 'New bill' button", () => {
     test("I should be sent on the New Bill page", async () => {
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
@@ -93,8 +101,8 @@ describe("Given I am connected as an employee", () => {
       expect(screen.getByText("Envoyer une note de frais")).toBeTruthy();
     });
   });
-  describe("When I am on Bills Page and I click on the first eye icon", async () => {
-    test("A modal should open", async () => {
+  describe("When I am on Bills Page and I click on the first eye icon", () => {
+    test("The modal should contain the right image", async () => {
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });
@@ -124,6 +132,14 @@ describe("Given I am connected as an employee", () => {
 
       const modale = screen.getByTestId("modaleFile");
       expect(modale).toBeTruthy();
+
+      await waitFor(() => screen.getByTestId("modaleImg"));
+      const modaleImg = screen.getByTestId("modaleImg");
+      expect(modaleImg).toBeTruthy();
+      expect(modaleImg.getAttribute("src")).toBe(
+        eyes[0].getAttribute("data-bill-url")
+      );
+      // TODO test classe visible
     });
   });
 });
@@ -197,3 +213,5 @@ describe("Given I am a user connected as Employee", () => {
     });
   });
 });
+
+// TODO test catch error
